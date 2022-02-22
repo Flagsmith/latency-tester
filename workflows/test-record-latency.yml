@@ -1,0 +1,51 @@
+name: Test and Record Latency
+
+on:
+    push:
+        branches: main
+    schedule:
+        - cron:  '*/5 * * * *' # every 5 minutes
+
+defaults:
+    run:
+        working-directory: latency_test
+
+jobs:
+    test-record-latency:
+        runs-on: ubuntu-latest
+        name: Test and Record Latency
+
+        steps:
+            - name: Cloning repo
+              uses: actions/checkout@v2
+              with:
+                  fetch-depth: 0
+
+            - name: Set up Python 3.9
+              uses: actions/setup-python@v2
+              with:
+                  python-version: 3.9
+
+            - name: Restore VirtualEnv from cache
+              uses: syphar/restore-virtualenv@v1.2
+              id: cache-latency
+
+            - name: Restore Pip from cache
+              uses: syphar/restore-pip-download-cache@v1
+              if: steps.cache-latency.outputs.cache-hit != 'true'
+
+            - name: Install Dependencies
+              if: steps.cache-latency.outputs.cache-hit != 'true'
+              run: |
+                  python -m pip install --upgrade pip
+                  pip install -r requirements.txt
+
+            - name: Run Latency Check
+              env:
+                    WHEREITSUP_CLIENT_ID: ${{ secrets.WHEREITSUP_CLIENT_ID }}
+                    WHEREITSUP_TOKEN: ${{ secrets.WHEREITSUP_TOKEN }}
+                    INFLUXDB_BUCKET: ${{ secrets.INFLUXDB_BUCKET }}
+                    INFLUXDB_ORG: ${{ secrets.INFLUXDB_ORG }}
+                    INFLUXDB_TOKEN: ${{ secrets.INFLUXDB_TOKEN }}
+                    INFLUXDB_URL: ${{ secrets.INFLUXDB_URL }}
+              run: python main.py
