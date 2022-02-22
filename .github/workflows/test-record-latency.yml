@@ -6,10 +6,6 @@ on:
     schedule:
         - cron:  '*/5 * * * *' # every 5 minutes
 
-defaults:
-    run:
-        working-directory: latency_test
-
 jobs:
     test-record-latency:
         runs-on: ubuntu-latest
