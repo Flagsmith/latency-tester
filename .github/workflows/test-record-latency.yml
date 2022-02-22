@@ -10,6 +10,7 @@ jobs:
     test-record-latency:
         runs-on: ubuntu-latest
         name: Test and Record Latency
+        environment: production
 
         steps:
             - name: Cloning repo
